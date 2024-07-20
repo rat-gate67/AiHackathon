@@ -1,12 +1,24 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 import cv2 #OpenCV:画像処理系ライブラリ
 import dlib #機械学習系ライブラリ
 import imutils #OpenCVの補助
 from imutils import face_utils
 import numpy as np
 import time
+
+class Timer:
+    def __init__(self) -> None:
+        self.start_time = None
+
+    def start(self):
+        self.start_time = time.time()
+
+    def check(self):
+        if self.start_time is None:
+            return -1
+        return time.time() - self.start_time
+    
+    def stop(self):
+        self.start_time = None
 
 DEVICE_ID = 2 #　使用するカメラのID 0は標準webカメラ
 capture = cv2.VideoCapture(DEVICE_ID)#dlibの学習済みデータの読み込み
@@ -16,6 +28,7 @@ predictor_path = "shape_predictor_68_face_landmarks.dat"
 detector = dlib.get_frontal_face_detector() #顔検出器の呼び出し。ただ顔だけを検出する。
 predictor = dlib.shape_predictor(predictor_path) #顔から目鼻などランドマークを出力する
 
+timer = Timer()
 count = 0
 up = True
 down = False
@@ -28,8 +41,10 @@ for i in range(countdown):
     print(i+1)
     cv2.waitKey(1000) # 1秒待つ
 
+timer.start()
 
 while(True): #カメラから連続で画像を取得する
+    print(timer.check())
     ret, frame = capture.read() #カメラからキャプチャしてframeに１コマ分の画像データを入れる
 
     frame = imutils.resize(frame, width=1000) #frameの画像の表示サイズを整える
@@ -120,6 +135,7 @@ while(True): #カメラから連続で画像を取得する
             up = True
             down = False
             count += 1
+        
 
         (nose_end_point2D, _) = cv2.projectPoints(np.array([(0.0, 0.0, 500.0)]), rotation_vector,translation_vector, camera_matrix, dist_coeffs)
         #計算に使用した点のプロット/顔方向のベクトルの表示
@@ -132,10 +148,11 @@ while(True): #カメラから連続で画像を取得する
         cv2.arrowedLine(frame, p1, p2, (255, 0, 0), 2)
 
     cv2.imshow('frame',frame) # 画像を表示する
-    if cv2.waitKey(1) & 0xFF == ord('q'): #qを押すとbreakしてwhileから抜ける
+    if cv2.waitKey(1) & 0xFF == ord('q') or timer.check() >= rest_time: #qを押すとbreakしてwhileから抜ける
         break
 
 
+print(count)
 capture.release() #video captureを終了する
 cv2.destroyAllWindows() #windowを閉じる
 
