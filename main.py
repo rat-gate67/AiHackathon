@@ -22,7 +22,7 @@ class Timer:
     def stop(self):
         self.start_time = None
 
-DEVICE_ID = 0 #　使用するカメラのID 0は標準webカメラ
+DEVICE_ID = 2 #　使用するカメラのID 0は標準webカメラ
 capture = cv2.VideoCapture(DEVICE_ID)#dlibの学習済みデータの読み込み
 predictor_path = "shape_predictor_68_face_landmarks.dat"
 #学習済みdatファイルのパスをコピペ
@@ -36,6 +36,8 @@ up = True
 down = False
 rest_time = 30
 countdown = 3
+yaw_max = 0
+yaw_min = 0
 
 # Initialize the mixer module in pygame
 pygame.mixer.init()
@@ -151,6 +153,8 @@ while(True): #カメラから連続で画像を取得する
             down = False
             count += 1
         
+        yaw_max = max(yaw_max, yaw)
+        yaw_min = min(yaw_min, yaw)
 
         (nose_end_point2D, _) = cv2.projectPoints(np.array([(0.0, 0.0, 500.0)]), rotation_vector,translation_vector, camera_matrix, dist_coeffs)
         #計算に使用した点のプロット/顔方向のベクトルの表示
@@ -169,6 +173,17 @@ while(True): #カメラから連続で画像を取得する
 pygame.mixer.music.stop()
 print(count)
 print(f"c_cout = {c_count}")
+print(f"yaw_max = {yaw_max}, yaw_min = {yaw_min}")
+yaw_diff = yaw_max - yaw_min
+if yaw_diff < 20:
+    yaw_bonus = 300
+elif yaw_diff < 40:
+    yaw_bonus = 200
+elif yaw_diff < 60:
+    yaw_bonus = 100
+else:
+    yaw_bonus = 0
+print(f"score = {count * 100 + yaw_bonus}")
 capture.release() #video captureを終了する
 cv2.destroyAllWindows() #windowを閉じる
 
