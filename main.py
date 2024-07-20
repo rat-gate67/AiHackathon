@@ -189,7 +189,6 @@ while(True): #カメラから連続で画像を取得する
     if cv2.waitKey(1) & 0xFF == ord('q') or timer.check() >= rest_time: #qを押すとbreakしてwhileから抜ける
         break
 
-pygame.mixer.music.stop()
 print(count)
 print(f"c_cout = {c_count}")
 print(f"yaw_max = {yaw_max}, yaw_min = {yaw_min}")
@@ -202,7 +201,41 @@ elif yaw_diff < 60:
     yaw_bonus = 100
 else:
     yaw_bonus = 0
-print(f"score = {count * 100 + yaw_bonus}")
+score = count * 100 + yaw_bonus
+print(f"score = {score}")
+
+if count < rest_time / 5:
+    img = cv2.imread("stage0.jpeg")
+    cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.imshow('stage0',img)
+elif count < rest_time *2 / 5:
+    img = cv2.imread("stage1.jpeg")
+    cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.imshow('stage1',img)
+elif count < rest_time *4 / 5:
+    img = cv2.imread("stage2.jpeg")
+    cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.imshow('stage2',img)
+elif count < rest_time * 8 / 5:
+    img = cv2.imread("stage3.jpeg")
+    cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.imshow('stage3',img)
+elif count < rest_time * 10 / 5:
+    img = cv2.imread("stage4.jpeg")
+    cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.imshow('stage4',img)
+else:
+    img = cv2.imread("stage5.jpeg")
+    cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.imshow('stage5',img)
+
+
+# cv2.putText(frame, f"Score = {score}", (20, 10), cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 2)
+
+cv2.waitKey(20000) # 20秒待つ
+pygame.mixer.music.stop()
+
+
 capture.release() #video captureを終了する
 cv2.destroyAllWindows() #windowを閉じる
 
