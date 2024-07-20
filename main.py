@@ -156,17 +156,36 @@ while(True): #カメラから連続で画像を取得する
         yaw_max = max(yaw_max, yaw)
         yaw_min = min(yaw_min, yaw)
 
-        (nose_end_point2D, _) = cv2.projectPoints(np.array([(0.0, 0.0, 500.0)]), rotation_vector,translation_vector, camera_matrix, dist_coeffs)
-        #計算に使用した点のプロット/顔方向のベクトルの表示
-        for p in image_points:
-            cv2.drawMarker(frame, (int(p[0]), int(p[1])),  (0.0, 1.409845, 255),markerType=cv2.MARKER_CROSS, thickness=1)
+        # (nose_end_point2D, _) = cv2.projectPoints(np.array([(0.0, 0.0, 500.0)]), rotation_vector,translation_vector, camera_matrix, dist_coeffs)
+        # #計算に使用した点のプロット/顔方向のベクトルの表示
+        # for p in image_points:
+        #     cv2.drawMarker(frame, (int(p[0]), int(p[1])),  (0.0, 1.409845, 255),markerType=cv2.MARKER_CROSS, thickness=1)
 
-        p1 = (int(image_points[0][0]), int(image_points[0][1]))
-        p2 = (int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
+        # p1 = (int(image_points[0][0]), int(image_points[0][1]))
+        # p2 = (int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
 
-        cv2.arrowedLine(frame, p1, p2, (255, 0, 0), 2)
+        # cv2.arrowedLine(frame, p1, p2, (255, 0, 0), 2)
 
-    cv2.imshow('frame',frame) # 画像を表示する
+    # cv2.imshow('frame',frame) # 画像を表示する
+    if count < rest_time / 5:
+        img = cv2.imread("stage0.jpeg")
+        cv2.imshow('stage0',img)
+    elif count < rest_time *2 / 5:
+        img = cv2.imread("stage1.jpeg")
+        cv2.imshow('stage1',img)
+    elif count < rest_time *4 / 5:
+        img = cv2.imread("stage2.jpeg")
+        cv2.imshow('stage2',img)
+    elif count < rest_time * 8 / 5:
+        img = cv2.imread("stage3.jpeg")
+        cv2.imshow('stage3',img)
+    elif count < rest_time * 10 / 5:
+        img = cv2.imread("stage4.jpeg")
+        cv2.imshow('stage4',img)
+    else:
+        img = cv2.imread("stage5.jpeg")
+        cv2.imshow('stage5',img)
+
     if cv2.waitKey(1) & 0xFF == ord('q') or timer.check() >= rest_time: #qを押すとbreakしてwhileから抜ける
         break
 
