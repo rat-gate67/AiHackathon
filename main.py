@@ -6,6 +6,7 @@ import dlib #機械学習系ライブラリ
 import imutils #OpenCVの補助
 from imutils import face_utils
 import numpy as np
+import time
 
 DEVICE_ID = 2 #　使用するカメラのID 0は標準webカメラ
 capture = cv2.VideoCapture(DEVICE_ID)#dlibの学習済みデータの読み込み
@@ -18,6 +19,15 @@ predictor = dlib.shape_predictor(predictor_path) #顔から目鼻などランド
 count = 0
 up = True
 down = False
+rest_time = 60
+countdown = 3
+
+for i in range(countdown):
+    img = cv2.imread(f"{countdown-i}.jpeg")
+    cv2.imshow('img', img)
+    print(i+1)
+    cv2.waitKey(1000) # 1秒待つ
+
 
 while(True): #カメラから連続で画像を取得する
     ret, frame = capture.read() #カメラからキャプチャしてframeに１コマ分の画像データを入れる
