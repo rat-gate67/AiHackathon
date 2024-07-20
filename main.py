@@ -4,6 +4,8 @@ import imutils #OpenCVの補助
 from imutils import face_utils
 import numpy as np
 import time
+import pygame
+
 
 class Timer:
     def __init__(self) -> None:
@@ -20,7 +22,7 @@ class Timer:
     def stop(self):
         self.start_time = None
 
-DEVICE_ID = 2 #　使用するカメラのID 0は標準webカメラ
+DEVICE_ID = 0 #　使用するカメラのID 0は標準webカメラ
 capture = cv2.VideoCapture(DEVICE_ID)#dlibの学習済みデータの読み込み
 predictor_path = "shape_predictor_68_face_landmarks.dat"
 #学習済みdatファイルのパスをコピペ
@@ -32,8 +34,17 @@ timer = Timer()
 count = 0
 up = True
 down = False
-rest_time = 60
+rest_time = 30
 countdown = 3
+
+# Initialize the mixer module in pygame
+pygame.mixer.init()
+
+# Load the mp3 file
+pygame.mixer.music.load("audio.mp3")
+
+# Start playing the music
+pygame.mixer.music.play()
 
 for i in range(countdown):
     img = cv2.imread(f"{countdown-i}.jpeg")
@@ -43,9 +54,13 @@ for i in range(countdown):
 
 timer.start()
 
+c_count = 0
+
+
 while(True): #カメラから連続で画像を取得する
     print(timer.check())
     ret, frame = capture.read() #カメラからキャプチャしてframeに１コマ分の画像データを入れる
+    c_count += 1
 
     frame = imutils.resize(frame, width=1000) #frameの画像の表示サイズを整える
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) #gray scaleに変換する
@@ -127,11 +142,11 @@ while(True): #カメラから連続で画像を取得する
         cv2.putText(frame, 'down : ' + str(down), (20, 40), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
         cv2.putText(frame, 'count : ' + str(count), (20, 70), cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 2)
 
-        if up and pitch > 8:
+        if up and pitch > 5:
             up = False
             down = True
 
-        if down and pitch < -8:
+        if down and pitch < -5  :
             up = True
             down = False
             count += 1
@@ -151,8 +166,9 @@ while(True): #カメラから連続で画像を取得する
     if cv2.waitKey(1) & 0xFF == ord('q') or timer.check() >= rest_time: #qを押すとbreakしてwhileから抜ける
         break
 
-
+pygame.mixer.music.stop()
 print(count)
+print(f"c_cout = {c_count}")
 capture.release() #video captureを終了する
 cv2.destroyAllWindows() #windowを閉じる
 
