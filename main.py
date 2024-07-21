@@ -6,6 +6,9 @@ import numpy as np
 import time
 import pygame
 import csv
+import statistics
+
+BPM = 190
 
 def find_rank(score, logs):
     sorted_logs = sorted(logs, reverse=True)
@@ -18,6 +21,7 @@ def find_rank(score, logs):
 class Timer:
     def __init__(self) -> None:
         self.start_time = None
+        self.sep_times = [time.time()]
 
     def start(self):
         self.start_time = time.time()
@@ -27,6 +31,15 @@ class Timer:
             return -1
         return time.time() - self.start_time
     
+    def sep(self):    
+        self.sep_times.append(time.time())
+
+    def get_sep(self):
+        ret = []
+        for i in range(len(self.sep_times)-1):
+            ret.append(self.sep_times[i+1] - self.sep_times[i])
+        return ret
+
     def stop(self):
         self.start_time = None
 
@@ -41,7 +54,7 @@ timer = Timer()
 count = 0
 up = True
 down = False
-rest_time = 30
+rest_time = 10
 countdown = 3
 yaw_max = 0
 yaw_min = 0
@@ -53,14 +66,17 @@ pygame.mixer.init()
 pygame.mixer.music.load("audio.mp3")
 
 # Start playing the music
+print("music start")
 pygame.mixer.music.play()
+time.sleep(1.4)
 
 for i in range(countdown):
-    img = cv2.imread(f"{countdown-i}.jpeg")
+    img = cv2.imread(f"img/{countdown-i}.jpeg")
     cv2.imshow('img', img)
     print(i+1)
     cv2.waitKey(1000) # 1秒待つ
 
+print("timer start")
 timer.start()
 
 c_count = 0
@@ -158,6 +174,11 @@ while(True): #カメラから連続で画像を取得する
         if down and pitch < -5  :
             up = True
             down = False
+            timer.sep()
+            # pygame.mixer.music.load("dram.mp3")
+            # # Start playing the music
+            # pygame.mixer.music.play(-1)
+
             count += 1
         
         yaw_max = max(yaw_max, yaw)
@@ -175,22 +196,22 @@ while(True): #カメラから連続で画像を取得する
 
     # cv2.imshow('frame',frame) # 画像を表示する
     if count < rest_time / 5:
-        img = cv2.imread("stage0.jpeg")
+        img = cv2.imread("img/stage0.jpeg")
         cv2.imshow('stage0',img)
     elif count < rest_time *2 / 5:
-        img = cv2.imread("stage1.jpeg")
+        img = cv2.imread("img/stage1.jpeg")
         cv2.imshow('stage1',img)
     elif count < rest_time *4 / 5:
-        img = cv2.imread("stage2.jpeg")
+        img = cv2.imread("img/stage2.jpeg")
         cv2.imshow('stage2',img)
     elif count < rest_time * 8 / 5:
-        img = cv2.imread("stage3.jpeg")
+        img = cv2.imread("img/stage3.jpeg")
         cv2.imshow('stage3',img)
     elif count < rest_time * 10 / 5:
-        img = cv2.imread("stage4.jpeg")
+        img = cv2.imread("img/stage4.jpeg")
         cv2.imshow('stage4',img)
     else:
-        img = cv2.imread("stage5.jpeg")
+        img = cv2.imread("img/stage5.jpeg")
         cv2.imshow('stage5',img)
 
     if cv2.waitKey(1) & 0xFF == ord('q') or timer.check() >= rest_time: #qを押すとbreakしてwhileから抜ける
@@ -218,12 +239,14 @@ with open('log.csv', 'r') as f:
     for line in f:
         logs.append(int(line))
         print(f"{line}")
-        # print(f"{type(line)}")
 
 with open('log.csv', 'a') as f:
     f.write(f"{score}\n")
 
 print(f"logs = {logs}")
+print(f"sep = {timer.get_sep()}")
+print(statistics.pvariance(timer.get_sep()))
+print(statistics.variance(timer.get_sep()) )
 
 rank = find_rank(score, logs)
 print(f"rank = {rank}")
@@ -261,6 +284,7 @@ else:
 
 cv2.waitKey(20000) # 20秒待つ
 pygame.mixer.music.stop()
+
 
 capture.release() #video captureを終了する
 cv2.destroyAllWindows() #windowを閉じる
