@@ -1,11 +1,19 @@
-import cv2 #OpenCV:画像処理系ライブラリ
-import dlib #機械学習系ライブラリ
-import imutils #OpenCVの補助
+import cv2 
+import dlib
+import imutils
 from imutils import face_utils
 import numpy as np
 import time
 import pygame
+import csv
 
+def find_rank(score, logs):
+    sorted_logs = sorted(logs, reverse=True)
+    rank = 1
+    for log in sorted_logs:
+        if score < log:
+            rank += 1
+    return rank
 
 class Timer:
     def __init__(self) -> None:
@@ -22,10 +30,9 @@ class Timer:
     def stop(self):
         self.start_time = None
 
-DEVICE_ID = 2 #　使用するカメラのID 0は標準webカメラ
-capture = cv2.VideoCapture(DEVICE_ID)#dlibの学習済みデータの読み込み
+DEVICE_ID = 2 
+capture = cv2.VideoCapture(DEVICE_ID)
 predictor_path = "shape_predictor_68_face_landmarks.dat"
-#学習済みdatファイルのパスをコピペ
 
 detector = dlib.get_frontal_face_detector() #顔検出器の呼び出し。ただ顔だけを検出する。
 predictor = dlib.shape_predictor(predictor_path) #顔から目鼻などランドマークを出力する
@@ -204,37 +211,56 @@ else:
 score = count * 100 + yaw_bonus
 print(f"score = {score}")
 
+
+# log.csv記録&取得
+logs = []
+with open('log.csv', 'r') as f:
+    for line in f:
+        logs.append(int(line))
+        print(f"{line}")
+        # print(f"{type(line)}")
+
+with open('log.csv', 'a') as f:
+    f.write(f"{score}\n")
+
+print(f"logs = {logs}")
+
+rank = find_rank(score, logs)
+print(f"rank = {rank}")
+
 if count < rest_time / 5:
     img = cv2.imread("stage0.jpeg")
     cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.putText(img, f'Rank: {rank}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)-100), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
     cv2.imshow('stage0',img)
 elif count < rest_time *2 / 5:
     img = cv2.imread("stage1.jpeg")
     cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.putText(img, f'Rank: {rank}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)-100), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
     cv2.imshow('stage1',img)
 elif count < rest_time *4 / 5:
     img = cv2.imread("stage2.jpeg")
     cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.putText(img, f'Rank: {rank}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)-100), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
     cv2.imshow('stage2',img)
 elif count < rest_time * 8 / 5:
     img = cv2.imread("stage3.jpeg")
     cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.putText(img, f'Rank: {rank}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)-100), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
     cv2.imshow('stage3',img)
 elif count < rest_time * 10 / 5:
     img = cv2.imread("stage4.jpeg")
     cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.putText(img, f'Rank: {rank}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)-100), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
     cv2.imshow('stage4',img)
 else:
     img = cv2.imread("stage5.jpeg")
     cv2.putText(img, f'Score: {score}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+    cv2.putText(img, f'Rank: {rank}', (int(img.shape[1]/2)-200, int(img.shape[0]/2)-100), cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
     cv2.imshow('stage5',img)
-
-
-# cv2.putText(frame, f"Score = {score}", (20, 10), cv2.FONT_HERSHEY_PLAIN, 5, (0, 0, 255), 2)
 
 cv2.waitKey(20000) # 20秒待つ
 pygame.mixer.music.stop()
-
 
 capture.release() #video captureを終了する
 cv2.destroyAllWindows() #windowを閉じる
